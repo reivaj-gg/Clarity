@@ -1,0 +1,33 @@
+
+# iOS
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+**/xcshareddata/WorkspaceSettings.xcsettings
+**/xcuserdata
+.DS_Store
+Podfile.lock
+Pods/
+
+# Kotlin / JetBrains
+.idea/
+*.iml
+*.iws
+*.ipr
+*.kt.bak
+
+# Gradle
+.gradle/
+build/
+**/build/
+*.apk
+*.aab
+
+# Local configuration
+local.properties
+
+# OS
+Thumbs.db
+
