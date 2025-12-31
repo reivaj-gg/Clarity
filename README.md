@@ -2,7 +2,7 @@
 
 ## The Origin Story
 
-In 2023, I participated in **ESPINA** — a longitudinal study on pesticide exposure in children and adolescents conducted by CIMAS (https://cimas.edu.ec/portafolio/estudio-de-exposicion-secundaria-a-plaguicidas-en-ninos-y-adolescentes-espina/).
+From 2022 to 2024, I participated in **ESPINA** — a longitudinal study on pesticide exposure in children and adolescents conducted by CIMAS (https://cimas.edu.ec/portafolio/estudio-de-exposicion-secundaria-a-plaguicidas-en-ninos-y-adolescentes-espina/).
 
 As part of the study, researchers asked us to use an app called **NeuroX**. It wasn't just a game collection — it was a *research tool* that combined cognitive games with a daily check-in questionnaire. Every session, I'd answer questions about my mood, sleep, stress, and context. Then I'd play cognitive tasks. Over months, I started noticing patterns:
 
@@ -234,5 +234,28 @@ Clarity isn't trying to be a replacement for medical treatment or clinical asses
 4. **Enables** future research through rich, contextualized data
 
 The hope is that thousands of people using Clarity could one day contribute to a collective understanding of how lifestyle, mood, and daily events affect cognition — data that researchers could use to help millions.
+
+c
+## Technical Architecture (The "How")
+
+This project is built from scratch for the Kotlin Multiplatform Contest 2025.
+
+### Tech Stack
+*   **Language**: Kotlin 2.0
+*   **Platform**: Kotlin Multiplatform (Android & iOS)
+*   **UI**: Compose Multiplatform (Shared UI)
+*   **Dependency Injection**: Koin 4.0
+*   **Navigation**: JetPack Navigation Compose
+*   **Serialization**: Kotlinx Serialization
+*   **Date/Time**: Kotlinx DateTime
+*   **Architecture**: MVI (Model-View-Intent) pattern with `StateFlow`
+
+### Project Structure
+*   `composeApp/`: Contains 100% of the game logic, UI code, and data repositories.
+    *   `commonMain`: The heart of the app.
+    *   `androidMain`: Android-specific entry points.
+    *   `iosMain`: iOS-specific entry points.
+*   `androidApp/`: Thin wrapper for the Android application.
+*   `iosApp/`: Thin wrapper for the iOS application.
 
 ---
