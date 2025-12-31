@@ -12,6 +12,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
+/**
+ * State container for the Simon Sequence game.
+ * @property sequence The ordered list of signals (indices) to show.
+ * @property userStep The current index in the sequence the user is expected to match.
+ * @property activeLight The index of the currently illuminated item (visual feedback).
+ * @property isUserInputAllowed True when playback is done and user can interact.
+ */
 data class SimonGameState(
     val isPlaying: Boolean = false,
     val isGameOver: Boolean = false,
@@ -23,6 +30,14 @@ data class SimonGameState(
     val message: String? = null
 )
 
+/**
+ * ViewModel for the "Simon Says" sequence memory task.
+ *
+ * Logic:
+ * - Appends one new step to the sequence each round.
+ * - Plays back the full sequence using delays.
+ * - Validates user input step-by-step.
+ */
 class SimonGameViewModel(
     private val repository: ClarityRepository
 ) : ViewModel() {

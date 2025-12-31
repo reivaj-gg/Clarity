@@ -12,6 +12,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
+/**
+ * State container for the Visuospatial Grid game.
+ * @property isPlaying True if the game is active.
+ * @property gridSize The dimension of the grid (e.g., 3 for 3x3).
+ * @property pattern The set of indices that define the target pattern.
+ * @property userSelection The indices selected by the user so far.
+ * @property phase The current game state (Previewing pattern vs Inputting).
+ */
 data class PatternGameState(
     val isPlaying: Boolean = false,
     val isGameOver: Boolean = false,
@@ -27,6 +35,14 @@ data class PatternGameState(
 
 enum class PatternGamePhase { IDLE, PREVIEW, INPUT, FEEDBACK }
 
+/**
+ * ViewModel for the "Pattern Grid" memory task.
+ *
+ * Logic:
+ * - Generates a random pattern of highlighted cells.
+ * - Shows pattern -> Hides pattern -> Validates user recall.
+ * - Adapts difficulty by increasing grid size and pattern complexity.
+ */
 class PatternGameViewModel(
     private val repository: ClarityRepository
 ) : ViewModel() {

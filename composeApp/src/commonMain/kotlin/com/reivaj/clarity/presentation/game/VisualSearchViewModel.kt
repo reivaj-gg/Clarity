@@ -13,6 +13,12 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlin.random.Random
 
+/**
+ * State for the Visual Search game.
+ * @property items The grid of symbols currently displayed.
+ * @property target The specific symbol the user must find.
+ * @property timeLeft Seconds remaining in the session.
+ */
 data class SearchGameState(
     val isPlaying: Boolean = false,
     val isGameOver: Boolean = false,
@@ -23,6 +29,14 @@ data class SearchGameState(
     val timeLeft: Int = 30
 )
 
+/**
+ * ViewModel for the Visual Search attention task.
+ *
+ * Logic:
+ * - Generates a grid of distractor symbols with exactly one unique target.
+ * - Runs a countdown timer.
+ * - Handles correct taps (points + time bonus) and incorrect taps (time penalty).
+ */
 class VisualSearchViewModel(
     private val repository: ClarityRepository
 ) : ViewModel() {
