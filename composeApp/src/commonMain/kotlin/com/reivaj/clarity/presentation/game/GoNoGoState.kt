@@ -12,5 +12,6 @@ data class GoNoGoState(
     val isGoStimulus: Boolean = false,
     val feedback: String? = null,
     val totalReactionTime: Long = 0L,
-    val reactionCount: Int = 0
+    val reactionCount: Int = 0,
+    val lastReactionTime: Long? = null,
 )

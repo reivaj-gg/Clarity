@@ -27,6 +27,9 @@ val appModule = module {
     factory { com.reivaj.clarity.domain.usecase.GenerateInsightUseCase(get()) }
     factory { com.reivaj.clarity.domain.usecase.GetSessionsWithEmaUseCase(get()) }
     factory { com.reivaj.clarity.domain.usecase.IsCheckInCompleteUseCase(get()) }
+    factory { com.reivaj.clarity.domain.usecase.GetProfileStatsUseCase(get()) }
+    factory { com.reivaj.clarity.domain.usecase.GetLast7DaysStatsUseCase(get()) }
+    factory { com.reivaj.clarity.domain.usecase.ExportDataUseCase(get()) }
 
     // Utils
     factory { com.reivaj.clarity.domain.util.DataSeeder(get()) }
@@ -39,6 +42,5 @@ val appModule = module {
     factory { com.reivaj.clarity.presentation.game.PatternGameViewModel(get()) }
     factory { com.reivaj.clarity.presentation.game.SimonGameViewModel(get()) }
     factory { com.reivaj.clarity.presentation.game.VisualSearchViewModel(get()) }
-    factory { com.reivaj.clarity.presentation.profile.ProfileViewModel(get()) }
+    factory { com.reivaj.clarity.presentation.profile.ProfileViewModel(get(), get(), get(), get()) }
 }
-

@@ -71,7 +71,8 @@ class GameViewModel(
                     feedback = "Correct!",
                     currentSymbol = null, // Clear stimulus immediately on correct response
                     totalReactionTime = it.totalReactionTime + reactionTime,
-                    reactionCount = it.reactionCount + 1
+                    reactionCount = it.reactionCount + 1,
+                    lastReactionTime = reactionTime,
                 )
             }
         } else {
