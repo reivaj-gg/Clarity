@@ -34,11 +34,12 @@ fun App() {
     ClarityTheme {
         // Koin is initialized in AndroidApp on Android.
         // koinInject will use GlobalContext.
-        val navController = rememberNavController()
-        // Track current route for Bottom Bar selection
-        // In complex apps, use `navController.currentBackStackEntryAsState()`
-        // For simplicity in MVP:
-
+        // Wrap in KoinContext to silence warning and ensure Compose scope interaction
+        KoinContext {
+            val navController = rememberNavController()
+            // Track current route for Bottom Bar selection
+            // In complex apps, use `navController.currentBackStackEntryAsState()`
+            // For simplicity in MVP:
             Scaffold(
                 bottomBar = {
                     NavigationBar {
@@ -103,7 +104,7 @@ fun App() {
                                 onNavigateHome = { navController.navigate("train") }
                             )
                         }
-                        
+
                         composable("game/pattern") {
                             com.reivaj.clarity.presentation.game.PatternGameScreen(
                                 onNavigateHome = { navController.navigate("train") }
@@ -111,13 +112,13 @@ fun App() {
                         }
 
                         composable("game/simon") {
-                             com.reivaj.clarity.presentation.game.SimonGameScreen(
+                            com.reivaj.clarity.presentation.game.SimonGameScreen(
                                 onNavigateHome = { navController.navigate("train") }
                             )
                         }
 
                         composable("game/search") {
-                             com.reivaj.clarity.presentation.game.VisualSearchScreen(
+                            com.reivaj.clarity.presentation.game.VisualSearchScreen(
                                 onNavigateHome = { navController.navigate("train") }
                             )
                         }
@@ -136,6 +137,7 @@ fun App() {
                     }
                 }
             }
+        }
     }
 }
 

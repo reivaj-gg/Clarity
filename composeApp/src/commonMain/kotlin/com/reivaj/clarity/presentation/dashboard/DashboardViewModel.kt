@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.reivaj.clarity.domain.usecase.GenerateInsightUseCase
+import com.reivaj.clarity.domain.usecase.GetSessionsWithEmaUseCase
 
 /**
  * UI State for the Dashboard screen.
@@ -31,7 +33,8 @@ data class DashboardState(
  * - Exposing state to the UI.
  */
 class DashboardViewModel(
-    private val repository: ClarityRepository
+    private val getSessionsWithEmaUseCase: GetSessionsWithEmaUseCase,
+    private val generateInsightUseCase: GenerateInsightUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DashboardState())
@@ -45,15 +48,17 @@ class DashboardViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             
-            val sessionsPair = repository.getSessionsWithEMA()
+            val sessionsPair = getSessionsWithEmaUseCase()
             val sessions = sessionsPair.map { it.first }.sortedByDescending { it.timestamp }
             
-            val insights = generateInsights(sessionsPair)
+            // Map Domain Insights to Strings for MVP UI
+            val domainInsights = generateInsightUseCase()
+            val insightStrings = domainInsights.map { "${it.title}: ${it.description}" }
             
             _state.update { 
                 it.copy(
                     recentSessions = sessions,
-                    insights = insights,
+                    insights = insightStrings,
                     isLoading = false
                 ) 
             }

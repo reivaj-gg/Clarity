@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.reivaj.clarity.data.repository.ClarityRepository
 import com.reivaj.clarity.domain.model.GameSession
 import com.reivaj.clarity.domain.model.GameType
+import com.reivaj.clarity.util.randomUUID
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,36 +15,6 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlin.random.Random
 
-/**
- * State container for the Go/No-Go game.
- * @property isPlaying True if the game loop is active.
- * @property currentSymbol The text/symbol currently displayed.
- * @property isGoStimulus True if the current symbol requires a reaction (Go) or inhibition (No-Go).
- * @property score Current score.
- * @property rounds Number of rounds completed.
- * @property maxRounds Total rounds in the session.
- * @property feedback Result message (Correct/Missed) for the last round.
- * @property isGameOver True when the session is finished.
- */
-data class GoNoGoState(
-    val isPlaying: Boolean = false,
-    val currentSymbol: String? = null, // "GO" or "NO-GO" (or shapes)
-    val isGoStimulus: Boolean = false,
-    val score: Int = 0,
-    val rounds: Int = 0,
-    val maxRounds: Int = 20,
-    val feedback: String? = null, // "Correct!", "Missed!", "Wrong!"
-    val isGameOver: Boolean = false
-)
-
-/**
- * ViewModel managing the "Go/No-Go" cognitive task.
- *
- * Logic:
- * - Presents stimuli at random intervals.
- * - Tracks reaction time (Go trials) and errors (No-Go taps or Go misses).
- * - Saves the result to the repository upon completion.
- */
 class GameViewModel(
     private val repository: ClarityRepository
 ) : ViewModel() {
@@ -50,86 +22,103 @@ class GameViewModel(
     private val _state = MutableStateFlow(GoNoGoState())
     val state = _state.asStateFlow()
 
-    private var currentReactionStartTime: Long = 0
-    private var totalReactionTime: Long = 0
-    private var reactionCount: Int = 0
+    private var gameJob: Job? = null
+    private var stimulusTime: Long = 0
 
     fun startGame() {
-        _state.update { GoNoGoState(isPlaying = true) }
-        runGameLoop()
-    }
+        _state.value = GoNoGoState(isPlaying = true)
+        gameJob = viewModelScope.launch {
+            while (_state.value.rounds < 20 && _state.value.isPlaying) {
+                // 1-3 second delay before showing next stimulus
+                delay(Random.nextLong(1000, 3000))
+                if (!_state.value.isPlaying) break // Check again after delay
 
-    private fun runGameLoop() {
-        viewModelScope.launch {
-            while (_state.value.rounds < _state.value.maxRounds && _state.value.isPlaying) {
-                _state.update { it.copy(feedback = null, currentSymbol = null) }
-                delay(Random.nextLong(1000, 2000)) // Inter-stimulus interval
+                val isGo = Random.nextFloat() < 0.75 // 75% chance of being a "Go" stimulus
+                val symbol = if (isGo) "+" else "x"
 
-                val isGo = Random.nextBoolean()
-                val symbol = if (isGo) "🟢 GO" else "🔴 NO CHANGE" // Simple text/emoji for now
-                
-                currentReactionStartTime = Clock.System.now().toEpochMilliseconds()
-                
-                _state.update { 
-                    it.copy(
-                        currentSymbol = symbol, 
-                        isGoStimulus = isGo, 
-                        rounds = it.rounds + 1
-                    ) 
+                _state.update { it.copy(currentSymbol = symbol, isGoStimulus = isGo, feedback = null) }
+                stimulusTime = Clock.System.now().toEpochMilliseconds()
+
+                // Stimulus shown for 1 second
+                delay(1000)
+
+                // If it was a "Go" stimulus and player did not respond, it's a miss.
+                if (_state.value.currentSymbol != null && _state.value.isGoStimulus) {
+                    handleIncorrectResponse("Miss!")
                 }
 
-                delay(1500) // Time to respond
-                
-                // If user didn't tap and it was GO: Miss
-                // If user didn't tap and it was NO-GO: Correct (handled in next loop start or implicit logic?)
-                // Actually, let's process result if no tap occurred
-                val currentState = _state.value
-                if (currentState.currentSymbol != null) {
-                   // Time expired for this stimulus
-                   if (currentState.isGoStimulus) {
-                       _state.update { it.copy(feedback = "Missed!", currentSymbol = null) }
-                   } else {
-                        // Correct rejection
-                       _state.update { it.copy(feedback = "Good stay!", score = it.score + 10, currentSymbol = null) }
-                   }
+                // Clear symbol after response window
+                if (_state.value.isPlaying) {
+                    _state.update { it.copy(currentSymbol = null, rounds = it.rounds + 1) }
                 }
             }
-            endGame()
+            // Finish game if loop completes
+            if (_state.value.isPlaying) {
+                finishGame()
+            }
         }
     }
 
-    fun onUserTap() {
-        if (!_state.value.isPlaying || _state.value.currentSymbol == null) return
+    fun onStimulusResponse() {
+        if (_state.value.currentSymbol == null) return // Ignore clicks when no stimulus is shown
 
-        val now = Clock.System.now().toEpochMilliseconds()
-        val reactionTime = now - currentReactionStartTime
-        val isGo = _state.value.isGoStimulus
+        val reactionTime = Clock.System.now().toEpochMilliseconds() - stimulusTime
 
-        if (isGo) {
-            totalReactionTime += reactionTime
-            reactionCount++
-            _state.update { it.copy(feedback = "Nice! ${reactionTime}ms", score = it.score + 20, currentSymbol = null) }
+        if (_state.value.isGoStimulus) {
+            _state.update {
+                it.copy(
+                    score = it.score + 10,
+                    feedback = "Correct!",
+                    currentSymbol = null, // Clear stimulus immediately on correct response
+                    totalReactionTime = it.totalReactionTime + reactionTime,
+                    reactionCount = it.reactionCount + 1
+                )
+            }
         } else {
-            _state.update { it.copy(feedback = "Oops! Should have waited.", score = it.score - 10, currentSymbol = null) }
+            // Responded to a "No-Go" stimulus, which is incorrect.
+            handleIncorrectResponse("Oops!")
         }
     }
 
-    private fun endGame() {
-        val avgReaction = if (reactionCount > 0) totalReactionTime / reactionCount else 0L
-        val finalScore = _state.value.score
-        
+    private fun handleIncorrectResponse(feedback: String) {
+        _state.update {
+            it.copy(
+                score = (it.score - 5).coerceAtLeast(0), // Prevent score from going below zero
+                feedback = feedback,
+                currentSymbol = null // Clear stimulus
+            )
+        }
+    }
+
+    private fun finishGame() {
+        gameJob?.cancel()
+        val finalState = _state.value
+        _state.value = finalState.copy(isPlaying = false, isGameOver = true)
+
         viewModelScope.launch {
+            val avgReaction = if (finalState.reactionCount > 0) finalState.totalReactionTime / finalState.reactionCount else 0L
+            val accuracy = if (finalState.rounds > 0) finalState.reactionCount.toFloat() / finalState.rounds else 0f
+
             val session = GameSession(
-                id = Random.nextLong().toString(),
+                id = randomUUID(),
+                timestamp = Clock.System.now(),
                 gameType = GameType.GO_NO_GO,
-                difficultyLevel = 1,
-                score = finalScore,
-                accuracy = 1.0f, // TODO: calculate real accuracy
+                score = finalState.score,
                 reactionTimeMs = avgReaction,
-                emaId = repository.getRecentEMA()?.id
+                accuracy = accuracy,
+                difficultyLevel = 1 // Placeholder for now
             )
             repository.saveGameSession(session)
-            _state.update { it.copy(isPlaying = false, isGameOver = true) }
         }
+    }
+
+    fun stopGame() {
+        gameJob?.cancel()
+        _state.value = GoNoGoState() // Reset state
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        gameJob?.cancel()
     }
 }

@@ -33,7 +33,6 @@ interface ClarityRepository {
     // Analysis Helper
     /**
      * Helper to retrieve sessions paired with their corresponding EMAs.
-     * Useful for correlation analysis (e.g., Sleep vs. Score).
      */
     suspend fun getSessionsWithEMA(): List<Pair<GameSession, EMA?>>
 
@@ -41,6 +40,6 @@ interface ClarityRepository {
     /** Observes whether the user has completed the mandatory daily check-in. */
     fun isCheckInCompleted(): Flow<Boolean>
 
-    /** Updates the daily check-in completion status. */
+    /** Sets the daily check-in completion status. */
     suspend fun setCheckInCompleted(completed: Boolean)
 }

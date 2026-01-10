@@ -235,7 +235,14 @@ Clarity isn't trying to be a replacement for medical treatment or clinical asses
 
 The hope is that thousands of people using Clarity could one day contribute to a collective understanding of how lifestyle, mood, and daily events affect cognition — data that researchers could use to help millions.
 
-c
+## Future Roadmap: The Hybrid Vision
+While Clarity is currently a private, offline-first application, we envision a "Hybrid Architecture" for Version 2:
+1.  **Offline Foundation (Current)**: Privacy-first tracking and basic statistics on-device.
+2.  **Opt-in Cloud Engine**: Users can enable WiFi/Cloud sync to access more powerful AI models (e.g., Gemini Flash) for deep correlation analysis, while keeping basic tracking offline.
+3.  **Community Benchmarks**: Anonymized data sharing to compare your reaction times against age-group norms.
+
+---
+
 ## Technical Architecture (The "How")
 
 This project is built from scratch for the Kotlin Multiplatform Contest 2025.

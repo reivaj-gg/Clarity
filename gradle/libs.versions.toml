@@ -21,6 +21,11 @@ koin = "3.5.6"
 koin-compose = "1.1.5"
 koin-android = "3.5.6"
 
+# Room
+room = "2.7.0-alpha01"
+sqlite = "2.5.0-alpha01"
+ksp = "2.0.0-1.0.21"
+
 [libraries]
 
 # Existing libraries
@@ -39,6 +44,11 @@ koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin-android" }
 koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin-compose" }
 
+# Room
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
+
 
 [plugins]
 
@@ -48,6 +58,8 @@ androidLibrary = { id = "com.android.library", version.ref = "android-gradlePlug
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+room = { id = "androidx.room", version.ref = "room" }
 
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "compose-compiler" }
