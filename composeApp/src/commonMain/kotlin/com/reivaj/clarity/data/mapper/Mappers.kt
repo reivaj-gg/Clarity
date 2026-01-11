@@ -73,8 +73,13 @@ fun GameSessionEntity.toDomain(): GameSession {
         score = score,
         accuracy = accuracy,
         reactionTimeMs = reactionTimeMs,
+        omissionErrors = omissionErrors,
+        commissionErrors = commissionErrors,
+        reactionTimeVariability = reactionTimeVariability,
+        userFeedback = userFeedback,
+        sessionStartHour = sessionStartHour,
         emaId = emaId,
-        isBaselineSession = isBaselineSession
+        isBaselineSession = isBaselineSession,
     )
 }
 
@@ -87,7 +92,12 @@ fun GameSession.toEntity(): GameSessionEntity {
         score = score,
         accuracy = accuracy,
         reactionTimeMs = reactionTimeMs,
+        omissionErrors = omissionErrors,
+        commissionErrors = commissionErrors,
+        reactionTimeVariability = reactionTimeVariability,
+        userFeedback = userFeedback,
+        sessionStartHour = sessionStartHour,
         emaId = emaId,
-        isBaselineSession = isBaselineSession
+        isBaselineSession = isBaselineSession,
     )
 }

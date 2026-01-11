@@ -9,8 +9,8 @@ import com.reivaj.clarity.data.local.entity.GameSessionEntity
 
 @Database(
     entities = [EmaEntity::class, GameSessionEntity::class],
-    version = 1,
-    exportSchema = false
+    version = 2, // Updated for analytics enhancement
+    exportSchema = false,
 )
 abstract class ClarityDatabase : RoomDatabase() {
     abstract fun emaDao(): EmaDao

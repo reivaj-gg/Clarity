@@ -9,6 +9,10 @@ import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 // Explicit import to avoid ambiguity
@@ -25,13 +29,16 @@ import com.reivaj.clarity.theme.ClarityTheme
  * The main entry point for the shared Compose Multiplatform UI.
  *
  * This Composable sets up:
- * 1. The [ClarityTheme] (Material 3).
+ * 1. The [ClarityTheme] (Material 3) with dark mode toggle support.
  * 2. The Koin dependency injection context.
  * 3. The top-level [NavHost] and [Scaffold] structure.
  */
 @Composable
 fun App() {
-    ClarityTheme {
+    // Dark mode state - hoisted to App level for global theme control
+    var darkModeEnabled by remember { mutableStateOf(false) }
+    
+    ClarityTheme(useDarkTheme = darkModeEnabled) {
         // Koin is initialized in AndroidApp on Android.
         // koinInject will use GlobalContext.
         // Wrap in KoinContext to silence warning and ensure Compose scope interaction
@@ -95,7 +102,10 @@ fun App() {
                         }
 
                         composable("profile") {
-                            com.reivaj.clarity.presentation.profile.ProfileScreen()
+                            com.reivaj.clarity.presentation.profile.ProfileScreen(
+                                darkModeEnabled = darkModeEnabled,
+                                onToggleDarkMode = { darkModeEnabled = !darkModeEnabled },
+                            )
                         }
 
                         // Games

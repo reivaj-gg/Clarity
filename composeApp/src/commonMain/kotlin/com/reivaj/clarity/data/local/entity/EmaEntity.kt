@@ -38,6 +38,8 @@ data class EmaEntity(
     val socialContext: String, // Enum Name
     val environmentContext: String, // Enum Name
     
+    val timeOfDay: Int = 0, // Hour when EMA was completed (0-23)
+    
     // Calculated
-    val isBaseline: Boolean
+    val isBaseline: Boolean,
 )

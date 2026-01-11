@@ -1,6 +1,7 @@
 package com.reivaj.clarity.di
 
 import androidx.room.Room
+import com.reivaj.clarity.data.export.PdfGenerator
 import com.reivaj.clarity.data.local.database.ClarityDatabase
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
@@ -16,11 +17,16 @@ actual val platformModule = module {
      * to build the database, names it "clarity.db", and provides a fallback
      * for destructive migrations.
      */
-    single {
+    single<ClarityDatabase> {
         Room.databaseBuilder(
             androidContext(),
             ClarityDatabase::class.java,
             "clarity.db"
         ).fallbackToDestructiveMigration().build()
     }
+    
+    /**
+     * Provides PDF generator for Android.
+     */
+    single { PdfGenerator(androidContext()) }
 }

@@ -15,6 +15,13 @@ data class GameSessionEntity(
     val accuracy: Float,
     val reactionTimeMs: Long?,
     
+    // Advanced metrics for enhanced analytics
+    val omissionErrors: Int = 0, // Missed responses (Go/No-Go)
+    val commissionErrors: Int = 0, // False alarms (Go/No-Go)
+    val reactionTimeVariability: Double = 0.0, // Std dev of RT (fatigue indicator)
+    val userFeedback: String? = null, // Optional post-game feedback
+    val sessionStartHour: Int = 0, // Hour of day (0-23) for circadian analysis
+    
     val emaId: String?,
-    val isBaselineSession: Boolean
+    val isBaselineSession: Boolean,
 )

@@ -41,6 +41,13 @@ data class GameSession(
     val accuracy: Float, // 0.0 to 1.0
     val reactionTimeMs: Long? = null, // Average reaction time, if applicable
     
+    // Advanced metrics for enhanced analytics
+    val omissionErrors: Int = 0, // Missed responses
+    val commissionErrors: Int = 0, // False alarms
+    val reactionTimeVariability: Double = 0.0, // RT std dev (fatigue indicator)
+    val userFeedback: String? = null, // Optional post-game feedback
+    val sessionStartHour: Int = 0, // Hour of day (0-23) for circadian analysis
+    
     val emaId: String? = null, // Link to the EMA taken before this session
-    val isBaselineSession: Boolean = false // Cached from EMA
+    val isBaselineSession: Boolean = false, // Cached from EMA
 )

@@ -74,7 +74,7 @@ val ClarityTypography = Typography(
 
 @Composable
 fun ClarityTheme(
-    useDarkTheme: Boolean = isSystemInDarkTheme(),
+    useDarkTheme: Boolean = false, // Default to light mode
     content: @Composable () -> Unit
 ) {
     // For now, let's enforce Light Theme as requested by the palette visual
