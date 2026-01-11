@@ -32,3 +32,5 @@ local.properties
 Thumbs.db
 
 
+# Secrets
+**/GeminiConfig.kt

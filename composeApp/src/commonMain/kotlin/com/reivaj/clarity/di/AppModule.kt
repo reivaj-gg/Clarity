@@ -40,6 +40,11 @@ val appModule = module {
 
     // Utils
     factory { com.reivaj.clarity.domain.util.DataSeeder(get()) }
+    
+    // AI Coach
+    single { com.reivaj.clarity.data.remote.GeminiAiService() }
+    factory { com.reivaj.clarity.domain.usecase.BuildAiContextUseCase(get()) }
+    factory { com.reivaj.clarity.domain.usecase.SendChatMessageUseCase(get(), get(), get()) }
 
     // ViewModels
     factory { EMAViewModel(get()) }
@@ -49,5 +54,6 @@ val appModule = module {
     factory { com.reivaj.clarity.presentation.game.PatternGameViewModel(get()) }
     factory { com.reivaj.clarity.presentation.game.SimonGameViewModel(get()) }
     factory { com.reivaj.clarity.presentation.game.VisualSearchViewModel(get()) }
-    factory { com.reivaj.clarity.presentation.profile.ProfileViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    factory { com.reivaj.clarity.presentation.profile.ProfileViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory { com.reivaj.clarity.presentation.coach.CoachViewModel(get(), get()) }
 }

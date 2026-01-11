@@ -3,9 +3,12 @@ package com.reivaj.clarity.data.repository
 import com.reivaj.clarity.data.local.database.ClarityDatabase
 import com.reivaj.clarity.data.mapper.toDomain
 import com.reivaj.clarity.data.mapper.toEntity
+import com.reivaj.clarity.domain.model.ChatMessage
 import com.reivaj.clarity.domain.model.EMA
 import com.reivaj.clarity.domain.model.GameSession
 import com.reivaj.clarity.domain.model.GameType
+import com.reivaj.clarity.data.local.entity.toDomain
+import com.reivaj.clarity.data.local.entity.toEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -14,7 +17,9 @@ class RoomClarityRepository(
 ) : ClarityRepository {
 
     private val emaDao = database.emaDao()
+
     private val gameSessionDao = database.gameSessionDao()
+    private val chatDao = database.chatDao()
 
     override suspend fun saveEMA(ema: EMA) {
         emaDao.insert(ema.toEntity())
@@ -68,5 +73,27 @@ class RoomClarityRepository(
             val ema = session.emaId?.let { emaMap[it] }
             session to ema
         }
+    }
+
+    override fun getRecentChatMessages(): Flow<List<ChatMessage>> {
+        return chatDao.getRecentMessages().map { list -> list.map { it.toDomain() } }
+    }
+
+    override suspend fun saveChatMessage(message: ChatMessage) {
+        chatDao.insertMessage(message.toEntity())
+    }
+
+    override suspend fun clearChatHistory() {
+        chatDao.clearHistory()
+    }
+    
+    private val preferenceDao = database.preferenceDao()
+
+    override fun getProfilePictureUri(): Flow<String?> {
+        return preferenceDao.getValue("profile_picture_uri")
+    }
+
+    override suspend fun saveProfilePictureUri(uri: String) {
+        preferenceDao.setValue(com.reivaj.clarity.data.local.entity.PreferenceEntity("profile_picture_uri", uri))
     }
 }

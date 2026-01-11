@@ -42,4 +42,21 @@ interface ClarityRepository {
 
     /** Sets the daily check-in completion status. */
     suspend fun setCheckInCompleted(completed: Boolean)
+    
+    // AI Coach Chat
+    /** Observes the recent chat history. */
+    fun getRecentChatMessages(): Flow<List<com.reivaj.clarity.domain.model.ChatMessage>>
+    
+    /** Saves a chat message (user or AI) to history. */
+    suspend fun saveChatMessage(message: com.reivaj.clarity.domain.model.ChatMessage)
+    
+    /** Clears all chat history. */
+    suspend fun clearChatHistory()
+    
+    // Preferences
+    /** Observes the current profile picture URI. */
+    fun getProfilePictureUri(): Flow<String?>
+    
+    /** Saves the profile picture URI. */
+    suspend fun saveProfilePictureUri(uri: String)
 }

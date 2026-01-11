@@ -54,4 +54,27 @@ class InMemoryClarityRepository : ClarityRepository {
     override suspend fun setCheckInCompleted(completed: Boolean) {
         _isCheckInCompleted.update { completed }
     }
+    
+    // AI Coach Chat
+    private val _chatMessages = MutableStateFlow<List<com.reivaj.clarity.domain.model.ChatMessage>>(emptyList())
+    
+    override fun getRecentChatMessages(): Flow<List<com.reivaj.clarity.domain.model.ChatMessage>> {
+        return _chatMessages.asStateFlow()
+    }
+    
+    override suspend fun saveChatMessage(message: com.reivaj.clarity.domain.model.ChatMessage) {
+        _chatMessages.update { it + message }
+    }
+    
+    override suspend fun clearChatHistory() {
+        _chatMessages.value = emptyList()
+    }
+    
+    private val _profilePictureUri = MutableStateFlow<String?>(null)
+
+    override fun getProfilePictureUri(): Flow<String?> = _profilePictureUri.asStateFlow()
+
+    override suspend fun saveProfilePictureUri(uri: String) {
+        _profilePictureUri.value = uri
+    }
 }

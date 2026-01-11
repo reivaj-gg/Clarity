@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Person
@@ -64,6 +65,12 @@ fun App() {
                         )
                         NavigationBarItem(
                             selected = false,
+                            onClick = { navController.navigate("coach") { launchSingleTop = true } },
+                            icon = { Icon(Icons.Default.AutoAwesome, "Coach") },
+                            label = { Text("Coach") }
+                        )
+                        NavigationBarItem(
+                            selected = false,
                             onClick = { navController.navigate("profile") { launchSingleTop = true } },
                             icon = { Icon(Icons.Default.Person, "Profile") },
                             label = { Text("Profile") }
@@ -99,6 +106,10 @@ fun App() {
 
                         composable("insights") {
                             com.reivaj.clarity.presentation.insights.InsightsScreen()
+                        }
+                        
+                        composable("coach") {
+                            com.reivaj.clarity.presentation.coach.CoachScreen()
                         }
 
                         composable("profile") {

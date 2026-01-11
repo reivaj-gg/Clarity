@@ -11,9 +11,12 @@ import com.reivaj.clarity.domain.usecase.GeneratePdfReportUseCase
 import com.reivaj.clarity.domain.usecase.GetLast7DaysStatsUseCase
 import com.reivaj.clarity.domain.usecase.GetProfileStatsUseCase
 import com.reivaj.clarity.data.export.PdfFileHandler
+import com.reivaj.clarity.data.repository.ClarityRepository
 import com.reivaj.clarity.domain.util.DataSeeder
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(
@@ -24,6 +27,7 @@ class ProfileViewModel(
     private val calculateAnalyticsUseCase: CalculateAnalyticsUseCase,
     private val generatePdfReportUseCase: GeneratePdfReportUseCase,
     private val pdfFileHandler: PdfFileHandler,
+    private val repository: ClarityRepository,
 ) : ViewModel() {
 
     private val _isSeeding = MutableStateFlow(false)
@@ -44,8 +48,8 @@ class ProfileViewModel(
     private val _exportedData = MutableStateFlow<String?>(null)
     val exportedData = _exportedData.asStateFlow()
 
-    private val _profilePictureUri = MutableStateFlow<String?>(null)
-    val profilePictureUri = _profilePictureUri.asStateFlow()
+    val profilePictureUri = repository.getProfilePictureUri()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
     
     private val _pdfData = MutableStateFlow<ByteArray?>(null)
     val pdfData = _pdfData.asStateFlow()
@@ -146,11 +150,13 @@ class ProfileViewModel(
     }
     
     fun setProfilePictureUri(uri: String?) {
-        _profilePictureUri.value = uri
-        _showImagePicker.value = false
-        if (uri != null) {
-            _message.value = "Profile picture updated!"
+        viewModelScope.launch {
+            if (uri != null) {
+                repository.saveProfilePictureUri(uri)
+                _message.value = "Profile picture updated!"
+            }
         }
+        _showImagePicker.value = false
     }
     
     fun clearMessage() {
