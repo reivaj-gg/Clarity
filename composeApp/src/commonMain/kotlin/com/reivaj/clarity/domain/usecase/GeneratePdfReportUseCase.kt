@@ -1,29 +1,25 @@
 package com.reivaj.clarity.domain.usecase
 
 import com.reivaj.clarity.data.export.PdfGenerator
-import com.reivaj.clarity.data.repository.ClarityRepository
-import kotlinx.coroutines.flow.first
+import com.reivaj.clarity.domain.model.ReportPeriod
 
 /**
- * Use case to generate a PDF report of user's performance data.
+ * Use case to generate a comprehensive PDF report of user's performance data.
  *
- * Orchestrates data collection from repository and PDF generation.
+ * Orchestrates data collection, analysis, and PDF generation.
  */
 class GeneratePdfReportUseCase(
-    private val repository: ClarityRepository,
+    private val buildPdfReportDataUseCase: BuildPdfReportDataUseCase,
     private val pdfGenerator: PdfGenerator,
-    private val getProfileStatsUseCase: GetProfileStatsUseCase,
-    private val calculateAnalyticsUseCase: CalculateAnalyticsUseCase,
 ) {
-    suspend operator fun invoke(): ByteArray {
-        val stats = getProfileStatsUseCase()
-        val analytics = calculateAnalyticsUseCase()
-        val sessions = repository.getAllGameSessions().first()
-        
-        return pdfGenerator.generateReport(
-            stats = stats,
-            analytics = analytics,
-            recentSessions = sessions,
-        )
+    /**
+     * Generate a PDF report for the specified time period.
+     *
+     * @param period Report period (7, 14, or 30 days)
+     * @return PDF file as ByteArray
+     */
+    suspend operator fun invoke(period: ReportPeriod = ReportPeriod.LAST_7_DAYS): ByteArray {
+        val reportData = buildPdfReportDataUseCase(period)
+        return pdfGenerator.generateReport(reportData)
     }
 }

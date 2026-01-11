@@ -4,11 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.reivaj.clarity.domain.model.AnalyticsSummary
 import com.reivaj.clarity.domain.model.ProfileStats
+import com.reivaj.clarity.domain.model.ReportPeriod
 import com.reivaj.clarity.domain.usecase.CalculateAnalyticsUseCase
 import com.reivaj.clarity.domain.usecase.ExportDataUseCase
 import com.reivaj.clarity.domain.usecase.GeneratePdfReportUseCase
 import com.reivaj.clarity.domain.usecase.GetLast7DaysStatsUseCase
 import com.reivaj.clarity.domain.usecase.GetProfileStatsUseCase
+import com.reivaj.clarity.data.export.PdfFileHandler
 import com.reivaj.clarity.domain.util.DataSeeder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,6 +23,7 @@ class ProfileViewModel(
     private val exportDataUseCase: ExportDataUseCase,
     private val calculateAnalyticsUseCase: CalculateAnalyticsUseCase,
     private val generatePdfReportUseCase: GeneratePdfReportUseCase,
+    private val pdfFileHandler: PdfFileHandler,
 ) : ViewModel() {
 
     private val _isSeeding = MutableStateFlow(false)
@@ -102,27 +105,52 @@ class ProfileViewModel(
         }
     }
     
-    fun exportPdf() {
+    fun exportPdf(period: ReportPeriod = ReportPeriod.LAST_7_DAYS) {
         viewModelScope.launch {
             try {
-                _message.value = "Generating PDF report..."
-                val pdf = generatePdfReportUseCase()
-                _pdfData.value = pdf
-                _message.value = "PDF generated! ${pdf.size} bytes. Ready to share."
+                _message.value = "Generating ${period.label} PDF report..."
+                
+                // Generate PDF bytes
+                val pdfBytes = generatePdfReportUseCase(period)
+                _pdfData.value = pdfBytes
+                
+                // Save to file
+                _message.value = "Saving PDF..."
+                val filePath = pdfFileHandler.savePdf(pdfBytes, "clarity_report")
+                
+                _message.value = "PDF saved! Opening share dialog..."
+                
+                // Open share dialog
+                pdfFileHandler.sharePdf(filePath)
+                
+                _message.value = "PDF exported successfully! (${pdfBytes.size / 1024} KB)"
             } catch (e: Exception) {
-                _message.value = "PDF generation failed: ${e.message}"
-                println("PDF generation error: ${e.message}")
+                _message.value = "PDF export failed: ${e.message}"
+                println("PDF export error: ${e.message}")
                 e.printStackTrace()
             }
         }
     }
 
 
+    // Image picker trigger
+    private val _showImagePicker = MutableStateFlow(false)
+    val showImagePicker = _showImagePicker.asStateFlow()
+
     fun selectProfilePicture() {
-        _message.value = "Profile picture selection - Coming soon!"
-        // TODO: Implement platform-specific image picker
-        // Android: Use ActivityResultContracts.PickVisualMedia()
-        // iOS: Use PHPickerViewController
+        _showImagePicker.value = true
+    }
+    
+    fun onImagePickerDismissed() {
+        _showImagePicker.value = false
+    }
+    
+    fun setProfilePictureUri(uri: String?) {
+        _profilePictureUri.value = uri
+        _showImagePicker.value = false
+        if (uri != null) {
+            _message.value = "Profile picture updated!"
+        }
     }
     
     fun clearMessage() {

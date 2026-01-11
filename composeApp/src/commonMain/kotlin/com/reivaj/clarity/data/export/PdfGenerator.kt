@@ -1,8 +1,6 @@
 package com.reivaj.clarity.data.export
 
-import com.reivaj.clarity.domain.model.AnalyticsSummary
-import com.reivaj.clarity.domain.model.GameSession
-import com.reivaj.clarity.domain.model.ProfileStats
+import com.reivaj.clarity.domain.model.PdfReportData
 
 /**
  * Platform-specific PDF generator.
@@ -12,16 +10,10 @@ import com.reivaj.clarity.domain.model.ProfileStats
  */
 expect class PdfGenerator {
     /**
-     * Generate a PDF report from profile statistics and analytics.
+     * Generate a comprehensive PDF report from report data.
      *
-     * @param stats User profile statistics
-     * @param analytics Performance analytics summary
-     * @param recentSessions Recent game sessions for detailed history
+     * @param reportData Comprehensive report data including stats, analytics, insights
      * @return PDF file as ByteArray
      */
-    suspend fun generateReport(
-        stats: ProfileStats,
-        analytics: AnalyticsSummary?,
-        recentSessions: List<GameSession>,
-    ): ByteArray
+    suspend fun generateReport(reportData: PdfReportData): ByteArray
 }

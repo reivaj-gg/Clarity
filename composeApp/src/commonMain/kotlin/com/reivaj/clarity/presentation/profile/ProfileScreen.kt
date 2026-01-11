@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reivaj.clarity.domain.model.AnalyticsSummary
+import com.reivaj.clarity.domain.model.ReportPeriod
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
@@ -42,9 +43,17 @@ fun ProfileScreen(
     val profileAnalytics by viewModel.analytics.collectAsState()
     val exportedData by viewModel.exportedData.collectAsState()
     val profilePictureUri by viewModel.profilePictureUri.collectAsState()
+    val showImagePicker by viewModel.showImagePicker.collectAsState()
 
     // Local state for interactive settings (not persisted in this MVP build)
     var notificationsEnabled by remember { mutableStateOf(false) }
+    
+    // Image picker effect - platform-specific implementation will handle this
+    ImagePickerEffect(
+        showPicker = showImagePicker,
+        onImageSelected = { uri -> viewModel.setProfilePictureUri(uri) },
+        onDismiss = { viewModel.onImagePickerDismissed() },
+    )
 
     Column(
         modifier = Modifier
@@ -69,12 +78,18 @@ fun ProfileScreen(
                 .clickable { viewModel.selectProfilePicture() },
             contentAlignment = Alignment.Center,
         ) {
-            Icon(
-                Icons.Default.Person,
-                contentDescription = "Select Profile Picture",
-                modifier = Modifier.size(64.dp),
-                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
+            if (profilePictureUri != null) {
+                // Show selected image
+                ProfileImage(uri = profilePictureUri!!)
+            } else {
+                // Show default icon
+                Icon(
+                    Icons.Default.Person,
+                    contentDescription = "Select Profile Picture",
+                    modifier = Modifier.size(64.dp),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+            }
         }
         
         // Hint text
@@ -237,19 +252,108 @@ fun ProfileScreen(
         // Data Export Section
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp)) {
-                Text(
-                    "Data Export",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                )
+                // Title with Info Button
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        "Cognitive Assessment Report",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    )
+                    
+                    var showInfoDialog by remember { mutableStateOf(false) }
+                    
+                    IconButton(onClick = { showInfoDialog = true }) {
+                        Icon(
+                            Icons.Default.Info,
+                            contentDescription = "What is this?",
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                    
+                    // Info Dialog
+                    if (showInfoDialog) {
+                        AlertDialog(
+                            onDismissRequest = { showInfoDialog = false },
+                            icon = { Icon(Icons.Default.Info, null, tint = MaterialTheme.colorScheme.primary) },
+                            title = { Text("About PDF Report") },
+                            text = {
+                                Column {
+                                    Text(
+                                        "Generate a professional 5-page Cognitive Assessment Report that includes:",
+                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    Text("• Executive Summary with your Cognitive Performance Index (0-100 score)")
+                                    Text("• Psychological State Analysis (mood, anxiety, stress patterns)")
+                                    Text("• Sleep Architecture & its impact on your performance")
+                                    Text("• Circadian Rhythm Profile (your peak performance hours)")
+                                    Text("• Cognitive Error Patterns & trends")
+                                    Text("• Personalized recommendations based on your data")
+                                    Text("• Complete session history log")
+                                    Spacer(Modifier.height(8.dp))
+                                    Text(
+                                        "The report uses clinical terminology and is designed to help you understand how your lifestyle affects cognitive performance.",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            },
+                            confirmButton = {
+                                TextButton(onClick = { showInfoDialog = false }) {
+                                    Text("Got it!")
+                                }
+                            },
+                        )
+                    }
+                }
+                
                 Spacer(Modifier.height(8.dp))
-
+                
+                // Period selection state
+                var showPeriodDialog by remember { mutableStateOf(false) }
+                
                 OutlinedButton(
-                    onClick = viewModel::exportPdf,
+                    onClick = { showPeriodDialog = true },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Icon(Icons.Default.PictureAsPdf, null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text("Export PDF Report")
+                    Text("Generate PDF Report")
+                }
+                
+                // Period Selection Dialog
+                if (showPeriodDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showPeriodDialog = false },
+                        title = { Text("Select Report Period") },
+                        text = {
+                            Column {
+                                ReportPeriod.entries.forEach { period ->
+                                    TextButton(
+                                        onClick = {
+                                            showPeriodDialog = false
+                                            viewModel.exportPdf(period)
+                                        },
+                                        modifier = Modifier.fillMaxWidth(),
+                                    ) {
+                                        Text(
+                                            period.label,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                        )
+                                    }
+                                }
+                            }
+                        },
+                        confirmButton = {},
+                        dismissButton = {
+                            TextButton(onClick = { showPeriodDialog = false }) {
+                                Text("Cancel")
+                            }
+                        },
+                    )
                 }
 
                 exportedData?.let { json ->
