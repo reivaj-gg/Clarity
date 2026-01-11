@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import com.reivaj.clarity.domain.usecase.GenerateInsightUseCase
+import com.reivaj.clarity.domain.usecase.GenerateInsightsUseCase
 import com.reivaj.clarity.domain.usecase.GetSessionsWithEmaUseCase
 
 /**
@@ -34,7 +34,7 @@ data class DashboardState(
  */
 class DashboardViewModel(
     private val getSessionsWithEmaUseCase: GetSessionsWithEmaUseCase,
-    private val generateInsightUseCase: GenerateInsightUseCase
+    private val generateInsightsUseCase: GenerateInsightsUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DashboardState())
@@ -51,8 +51,8 @@ class DashboardViewModel(
             val sessionsPair = getSessionsWithEmaUseCase()
             val sessions = sessionsPair.map { it.first }.sortedByDescending { it.timestamp }
             
-            // Map Domain Insights to Strings for MVP UI
-            val domainInsights = generateInsightUseCase()
+            // Map Domain Insights to Strings for MVP UI in Dashboard (Use Insights tab for details)
+            val domainInsights = generateInsightsUseCase()
             val insightStrings = domainInsights.map { "${it.title}: ${it.description}" }
             
             _state.update { 

@@ -24,7 +24,7 @@ val appModule = module {
     factory { com.reivaj.clarity.domain.usecase.SaveEmaUseCase(get()) }
     factory { com.reivaj.clarity.domain.usecase.SaveGameSessionUseCase(get()) }
     factory { com.reivaj.clarity.domain.usecase.GetLatestEmaUseCase(get()) }
-    factory { com.reivaj.clarity.domain.usecase.GenerateInsightUseCase(get()) }
+
     factory { com.reivaj.clarity.domain.usecase.GetSessionsWithEmaUseCase(get()) }
     factory { com.reivaj.clarity.domain.usecase.IsCheckInCompleteUseCase(get()) }
     factory { com.reivaj.clarity.domain.usecase.GetProfileStatsUseCase(get()) }
@@ -56,4 +56,8 @@ val appModule = module {
     factory { com.reivaj.clarity.presentation.game.VisualSearchViewModel(get()) }
     factory { com.reivaj.clarity.presentation.profile.ProfileViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
     factory { com.reivaj.clarity.presentation.coach.CoachViewModel(get(), get()) }
+    
+    // Insights
+    factory { com.reivaj.clarity.domain.usecase.GenerateInsightsUseCase(get(), get(), get()) }
+    factory { com.reivaj.clarity.presentation.insights.InsightsViewModel(get()) }
 }

@@ -64,6 +64,37 @@ class GeminiAiService {
         }
     }
 
+    suspend fun generateDailyInsight(context: AiCoachContext): String {
+        if (GeminiConfig.API_KEY == "Your_API_Key_Here" || GeminiConfig.API_KEY == "YOUR_API_KEY_HERE") {
+            return "Enter your API Key to unlock Daily Wisdom."
+        }
+
+        val prompt = buildDailyInsightPrompt(context)
+        val requestBody = GeminiRequest(
+            contents = listOf(Content(parts = listOf(Part(text = prompt))))
+        )
+
+        val baseUrl = "https://generativelanguage.googleapis.com/v1beta/models"
+        val modelName = GeminiConfig.MODEL_NAME.removePrefix("models/")
+
+        return try {
+            val response: GeminiResponse = client.post("$baseUrl/$modelName:generateContent?key=${GeminiConfig.API_KEY}") {
+                contentType(ContentType.Application.Json)
+                setBody(requestBody)
+            }.body()
+
+            if (response.error != null) {
+                return "Coach unavailable: ${response.error.message}"
+            }
+
+            response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text 
+                ?: "Stay consistent and keep training!"
+        } catch (e: Exception) {
+            e.printStackTrace()
+            "Focus on your breathing today."
+        }
+    }
+
     private fun buildPrompt(message: String, context: AiCoachContext): String {
         return """
             You are Clarity Coach, an AI assistant specialized in cognitive performance 
@@ -87,6 +118,21 @@ class GeminiAiService {
             - Do not provide medical diagnoses.
             
             USER MESSAGE: $message
+        """.trimIndent()
+    }
+    
+    private fun buildDailyInsightPrompt(context: AiCoachContext): String {
+        return """
+            Generate a single, short, inspiring "Daily Wisdom" tip for this user based on their data.
+            Focus on one specific pattern (sleep, mood, or consistency).
+            Max 30 words. No greetings. Just the insight.
+            
+            USER CONTEXT:
+            - Name: ${context.userName}
+            - Sleep: ${context.sleepSummary}
+            - Mood: ${context.moodSummary}
+            - Streak: ${context.streak}
+            - Performance: ${context.performanceSummary}
         """.trimIndent()
     }
 }
