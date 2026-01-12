@@ -53,39 +53,40 @@ class DataSeeder(private val repository: ClarityRepository) {
             repository.saveEMA(ema)
             
             // 2. Generate Game Sessions related to EMA
-            // Rule: Bad Sleep/Stress -> Worse Performance
+            // Rule: Bad Sleep/Stress -> Worse Performance (0-100 scale)
+            val basePerformance = if (sleepHours >= 7.0 && stress <= 3) 85 else 55
+            val dailyFluctuation = Random.nextInt(-10, 15)
+            val finalScore = (basePerformance + dailyFluctuation).coerceIn(10, 100)
             
-            val performanceFactor = if (sleepHours < 6.0 || stress > 3) 0.7 else 1.1
-            
-            // Game 1: Go/No-Go (Reaction Time)
-            // Bad state -> Slower RT (higher ms)
-            val baseRt = 350L
-            val actualRt = (baseRt / performanceFactor).toLong() + Random.nextLong(-20, 20)
+            // Game 1: Go/No-Go
+            val rtBase = if (finalScore > 75) 300L else 450L
+            val rt = rtBase + Random.nextLong(-30, 30)
             
             repository.saveGameSession(
                 GameSession(
                     id = "seed_game_${i}_1",
-                    timestamp = timestamp.plus(10, DateTimeUnit.MINUTE, timeZone), // 10 mins after EMA
+                    timestamp = timestamp.plus(10, DateTimeUnit.MINUTE, timeZone),
                     gameType = GameType.GO_NO_GO,
                     difficultyLevel = 1,
-                    score = (1000 * performanceFactor).toInt(),
-                    accuracy = if (performanceFactor > 1.0) 0.95f else 0.82f,
-                    reactionTimeMs = actualRt,
+                    score = finalScore, // 0-100 Scale
+                    accuracy = finalScore / 100f,
+                    reactionTimeMs = rt,
                     emaId = emaId,
                     isBaselineSession = ema.isBaseline
                 )
             )
             
             // Game 2: Simon (Memory)
-            val baseScore = 500
+            // Correlate with Go/No-Go but with variation
+            val memScore = (finalScore + Random.nextInt(-5, 5)).coerceIn(0, 100)
             repository.saveGameSession(
                 GameSession(
                     id = "seed_game_${i}_2",
                     timestamp = timestamp.plus(15, DateTimeUnit.MINUTE, timeZone),
                     gameType = GameType.SIMON_SEQUENCE,
                     difficultyLevel = 1,
-                    score = (baseScore * performanceFactor).toInt(),
-                    accuracy = if (performanceFactor > 1.0) 0.90f else 0.70f,
+                    score = memScore, // 0-100 Scale
+                    accuracy = memScore / 100f,
                     emaId = emaId,
                     isBaselineSession = ema.isBaseline
                 )

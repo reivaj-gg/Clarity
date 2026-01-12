@@ -77,4 +77,19 @@ class InMemoryClarityRepository : ClarityRepository {
     override suspend fun saveProfilePictureUri(uri: String) {
         _profilePictureUri.value = uri
     }
+
+    private val _userName = MutableStateFlow<String?>(null)
+
+    override fun getUserName(): Flow<String?> = _userName.asStateFlow()
+
+    override suspend fun saveUserName(name: String) {
+        _userName.value = name
+    }
+
+    override suspend fun clearAllData() {
+        _emas.value = emptyList()
+        _sessions.value = emptyList()
+        _chatMessages.value = emptyList()
+        _isCheckInCompleted.value = false
+    }
 }

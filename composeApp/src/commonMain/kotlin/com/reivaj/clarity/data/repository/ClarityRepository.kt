@@ -59,4 +59,13 @@ interface ClarityRepository {
     
     /** Saves the profile picture URI. */
     suspend fun saveProfilePictureUri(uri: String)
+
+    /** Observes the current user name. */
+    fun getUserName(): Flow<String?>
+
+    /** Saves the user name. */
+    suspend fun saveUserName(name: String)
+
+    /** Clears all application data (EMAs, Sessions, Chat). Useful for testing/demos. */
+    suspend fun clearAllData()
 }

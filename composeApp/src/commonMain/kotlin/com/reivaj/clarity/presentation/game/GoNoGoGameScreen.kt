@@ -146,24 +146,24 @@ private fun GameStimulus(symbol: String?, onTap: () -> Unit) {
             .clickable(enabled = symbol != null, onClick = onTap),
         contentAlignment = Alignment.Center
     ) {
-        AnimatedVisibility(
-            visible = symbol != null,
-            enter = fadeIn() + scaleIn(spring(dampingRatio = Spring.DampingRatioMediumBouncy)),
-            exit = fadeOut() + scaleOut()
-        ) {
-            when (symbol) {
-                "+" -> Icon(
+        androidx.compose.animation.Crossfade(
+            targetState = symbol,
+            animationSpec = androidx.compose.animation.core.tween(150)
+        ) { currentSym ->
+            when (currentSym) {
+                "+", "✓", "GO" -> Icon(
                     Icons.Default.CheckCircle,
                     contentDescription = "GO - Tap Now!",
                     modifier = Modifier.size(160.dp),
                     tint = Color(0xFF4CAF50), // Vibrant Green
                 )
-                "x" -> Icon(
+                "x", "✗", "NOGO" -> Icon(
                     Icons.Default.Cancel,
                     contentDescription = "NO-GO - Don't Tap!",
                     modifier = Modifier.size(160.dp),
                     tint = Color(0xFFF44336), // Vibrant Red
                 )
+                else -> Spacer(Modifier.size(160.dp)) // Maintain layout size
             }
         }
     }

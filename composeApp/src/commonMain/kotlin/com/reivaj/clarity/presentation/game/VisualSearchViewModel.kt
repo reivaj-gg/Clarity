@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlin.random.Random
+import com.reivaj.clarity.domain.util.SoundManager
+import com.reivaj.clarity.domain.util.SoundType
 
 /**
  * State for the Visual Search game.
@@ -38,7 +40,8 @@ data class SearchGameState(
  * - Handles correct taps (points + time bonus) and incorrect taps (time penalty).
  */
 class VisualSearchViewModel(
-    private val repository: ClarityRepository
+    private val repository: ClarityRepository,
+    private val soundManager: SoundManager
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SearchGameState())
@@ -49,6 +52,7 @@ class VisualSearchViewModel(
     private val target = "T"
 
     fun startGame() {
+        soundManager.playSound(SoundType.CLICK)
         _state.update { SearchGameState(isPlaying = true) }
         nextRound()
         startTimeLoop()
@@ -87,16 +91,19 @@ class VisualSearchViewModel(
     fun onItemClick(symbol: String) {
         if (symbol == target) {
             // Correct
+            soundManager.playSound(SoundType.CORRECT)
             _state.update { it.copy(score = it.score + 1, timeLeft = it.timeLeft + 2) } // Bonus time
             nextRound()
         } else {
             // Wrong - penalize time?
+             soundManager.playSound(SoundType.WRONG)
              _state.update { it.copy(timeLeft = maxOf(0, it.timeLeft - 5)) }
         }
     }
 
     private fun endGame() {
-         viewModelScope.launch {
+        soundManager.playSound(SoundType.GAME_OVER)
+        viewModelScope.launch {
             repository.saveGameSession(
                 GameSession(
                     id = Random.nextLong().toString(),

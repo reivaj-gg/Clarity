@@ -58,6 +58,15 @@ class ProfileViewModel(
         loadStats()
     }
 
+    val userName = repository.getUserName()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "Guest User")
+
+    fun updateUserName(name: String) {
+        viewModelScope.launch {
+            repository.saveUserName(name)
+        }
+    }
+
     fun loadStats() {
         viewModelScope.launch {
             try {
@@ -165,5 +174,17 @@ class ProfileViewModel(
 
     fun clearExportedData() {
         _exportedData.value = null
+    }
+
+    fun resetApp() {
+        viewModelScope.launch {
+            try {
+                repository.clearAllData()
+                loadStats() // Refresh stats (should be empty now)
+                _message.value = "App data reset successfully! You can now start fresh."
+            } catch (e: Exception) {
+                _message.value = "Reset failed: ${e.message}"
+            }
+        }
     }
 }

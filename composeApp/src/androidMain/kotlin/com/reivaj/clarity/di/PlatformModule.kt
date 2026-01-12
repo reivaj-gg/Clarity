@@ -4,6 +4,8 @@ import androidx.room.Room
 import com.reivaj.clarity.data.export.PdfGenerator
 import com.reivaj.clarity.data.export.PdfFileHandler
 import com.reivaj.clarity.data.local.database.ClarityDatabase
+import com.reivaj.clarity.domain.util.AndroidSoundManager
+import com.reivaj.clarity.domain.util.SoundManager
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
@@ -13,10 +15,6 @@ import org.koin.dsl.module
 actual val platformModule = module {
     /**
      * Provides a singleton instance of the Room database.
-     *
-     * It uses the application context provided by Koin's `androidContext()`
-     * to build the database, names it "clarity.db", and provides a fallback
-     * for destructive migrations.
      */
     single<ClarityDatabase> {
         Room.databaseBuilder(
@@ -25,6 +23,12 @@ actual val platformModule = module {
             "clarity.db"
         ).fallbackToDestructiveMigration().build()
     }
+    
+    /**
+     * Provides the SoundManager implementation for Android.
+     * This implementation uses AudioTrack and does not require a Context.
+     */
+    single<SoundManager> { AndroidSoundManager() }
     
     /**
      * Provides PDF generator for Android.

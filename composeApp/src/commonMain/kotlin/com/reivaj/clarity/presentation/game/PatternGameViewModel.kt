@@ -11,6 +11,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.random.Random
+import com.reivaj.clarity.domain.util.SoundManager
+import com.reivaj.clarity.domain.util.SoundType
+
 
 /**
  * State container for the Visuospatial Grid game.
@@ -44,13 +47,15 @@ enum class PatternGamePhase { IDLE, PREVIEW, INPUT, FEEDBACK }
  * - Adapts difficulty by increasing grid size and pattern complexity.
  */
 class PatternGameViewModel(
-    private val repository: ClarityRepository
+    private val repository: ClarityRepository,
+    private val soundManager: SoundManager
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(PatternGameState())
     val state = _state.asStateFlow()
 
     fun startGame() {
+        soundManager.playSound(SoundType.CLICK)
         _state.update { PatternGameState(isPlaying = true, phase = PatternGamePhase.IDLE) }
         startLevel()
     }
@@ -59,15 +64,16 @@ class PatternGameViewModel(
         viewModelScope.launch {
             val currentLevel = _state.value.level
             // Scale difficulty:
-            // Level 1-2: 3x3 grid, 3 cells
-            // Level 3-5: 4x4 grid, 4-5 cells
-            // Level 6+: 5x5 grid, 6+ cells
-            val size = when {
-                currentLevel < 3 -> 3
-                currentLevel < 6 -> 4
-                else -> 5
-            }
-            val cellsToHighlight = currentLevel + 2 // Increase items to remember
+            // Increase grid size every 2 levels.
+            // Level 1-2: 3x3
+            // Level 3-4: 4x4
+            // ...
+            // Max 8x8
+            val calculatedSize = 3 + (currentLevel - 1) / 2
+            val size = calculatedSize.coerceAtMost(8)
+            
+            // Cells to remember increases with level
+            val cellsToHighlight = currentLevel + 2 
             
             // Generate pattern
             val totalCells = size * size
@@ -85,6 +91,7 @@ class PatternGameViewModel(
                     message = "Watch the pattern..."
                 )
             }
+            soundManager.playSound(SoundType.CLICK)
 
             delay(2000) // Show pattern for 2 seconds
 
@@ -102,6 +109,8 @@ class PatternGameViewModel(
         if (s.phase != PatternGamePhase.INPUT) return
 
         if (s.userSelection.contains(index)) return // Already selected
+        
+        soundManager.playSound(SoundType.CLICK)
 
         val newSelection = s.userSelection + index
         _state.update { it.copy(userSelection = newSelection) }
@@ -116,6 +125,7 @@ class PatternGameViewModel(
         viewModelScope.launch {
             if (userSelection == targetPattern) {
                 // Correct
+                soundManager.playSound(SoundType.CORRECT)
                 _state.update { 
                     it.copy(
                         phase = PatternGamePhase.FEEDBACK, 
@@ -128,6 +138,7 @@ class PatternGameViewModel(
                 startLevel()
             } else {
                 // Wrong
+                soundManager.playSound(SoundType.WRONG)
                 _state.update {
                     it.copy(
                         phase = PatternGamePhase.FEEDBACK,

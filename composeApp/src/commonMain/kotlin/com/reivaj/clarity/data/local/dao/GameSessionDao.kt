@@ -20,4 +20,7 @@ interface GameSessionDao {
 
     @Query("SELECT * FROM game_session_table WHERE gameType = :gameType ORDER BY timestamp DESC LIMIT 1")
     suspend fun getLatestSessionByType(gameType: String): GameSessionEntity?
+
+    @Query("DELETE FROM game_session_table")
+    suspend fun deleteAll()
 }

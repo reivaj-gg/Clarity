@@ -15,8 +15,12 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlin.random.Random
 
+import com.reivaj.clarity.domain.util.SoundManager
+import com.reivaj.clarity.domain.util.SoundType
+
 class GameViewModel(
-    private val repository: ClarityRepository
+    private val repository: ClarityRepository,
+    private val soundManager: SoundManager
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(GoNoGoState())
@@ -37,10 +41,12 @@ class GameViewModel(
                 val symbol = if (isGo) "+" else "x"
 
                 _state.update { it.copy(currentSymbol = symbol, isGoStimulus = isGo, feedback = null) }
-                stimulusTime = Clock.System.now().toEpochMilliseconds()
-
-                // Stimulus shown for 1 second
-                delay(1000)
+                soundManager.playSound(SoundType.CLICK) // Subtle cue
+                stimulusTime = Clock.System.now().toEpochMilliseconds() // Reset stimulus start time
+                
+                // Show stimulus for 1000ms (Response Window)
+                val responseWindow = 1000L
+                delay(responseWindow)
 
                 // If it was a "Go" stimulus and player did not respond, it's a miss.
                 if (_state.value.currentSymbol != null && _state.value.isGoStimulus) {
@@ -65,6 +71,7 @@ class GameViewModel(
         val reactionTime = Clock.System.now().toEpochMilliseconds() - stimulusTime
 
         if (_state.value.isGoStimulus) {
+            soundManager.playSound(SoundType.CORRECT)
             _state.update {
                 it.copy(
                     score = it.score + 10,
@@ -82,6 +89,7 @@ class GameViewModel(
     }
 
     private fun handleIncorrectResponse(feedback: String) {
+        soundManager.playSound(SoundType.WRONG)
         _state.update {
             it.copy(
                 score = (it.score - 5).coerceAtLeast(0), // Prevent score from going below zero

@@ -5,6 +5,8 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.reivaj.clarity.data.export.PdfGenerator
 import com.reivaj.clarity.data.export.PdfFileHandler
 import com.reivaj.clarity.data.local.database.ClarityDatabase
+import com.reivaj.clarity.domain.util.IosSoundManager
+import com.reivaj.clarity.domain.util.SoundManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import org.koin.dsl.module

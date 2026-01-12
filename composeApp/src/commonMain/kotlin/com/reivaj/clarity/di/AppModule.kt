@@ -47,13 +47,14 @@ val appModule = module {
     factory { com.reivaj.clarity.domain.usecase.SendChatMessageUseCase(get(), get(), get()) }
 
     // ViewModels
+    // ViewModels
     factory { EMAViewModel(get()) }
-    factory { GameViewModel(get()) }
+    factory { GameViewModel(get(), get()) } // Added SoundManager
     factory { com.reivaj.clarity.presentation.dashboard.DashboardViewModel(get(), get()) }
     factory { com.reivaj.clarity.presentation.train.TrainViewModel(get()) }
-    factory { com.reivaj.clarity.presentation.game.PatternGameViewModel(get()) }
-    factory { com.reivaj.clarity.presentation.game.SimonGameViewModel(get()) }
-    factory { com.reivaj.clarity.presentation.game.VisualSearchViewModel(get()) }
+    factory { com.reivaj.clarity.presentation.game.PatternGameViewModel(get(), get()) } // Added SoundManager
+    factory { com.reivaj.clarity.presentation.game.SimonGameViewModel(get(), get()) } // Added SoundManager
+    factory { com.reivaj.clarity.presentation.game.VisualSearchViewModel(get(), get()) } // Added SoundManager
     factory { com.reivaj.clarity.presentation.profile.ProfileViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
     factory { com.reivaj.clarity.presentation.coach.CoachViewModel(get(), get()) }
     

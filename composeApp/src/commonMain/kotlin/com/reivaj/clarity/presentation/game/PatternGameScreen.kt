@@ -128,6 +128,7 @@ fun PatternGameScreen(
             
             Text(
                 state.message ?: "",
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,

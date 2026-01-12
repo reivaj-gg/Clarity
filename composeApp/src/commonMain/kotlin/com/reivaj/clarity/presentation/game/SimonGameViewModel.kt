@@ -11,7 +11,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.random.Random
-
+import com.reivaj.clarity.domain.util.SoundManager
+import com.reivaj.clarity.domain.util.SoundType
 /**
  * State container for the Simon Sequence game.
  * @property sequence The ordered list of signals (indices) to show.
@@ -39,13 +40,15 @@ data class SimonGameState(
  * - Validates user input step-by-step.
  */
 class SimonGameViewModel(
-    private val repository: ClarityRepository
+    private val repository: ClarityRepository,
+    private val soundManager: SoundManager
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SimonGameState())
     val state = _state.asStateFlow()
 
     fun startGame() {
+        soundManager.playSound(SoundType.CLICK)
         _state.update { SimonGameState(isPlaying = true, message = "Watch the sequence") }
         addToSequenceAndPlay()
     }
@@ -68,6 +71,7 @@ class SimonGameViewModel(
             // Playback
             for (step in newSequence) {
                 _state.update { it.copy(activeLight = step) }
+                soundManager.playSound(SoundType.CLICK) // Beep per light
                 delay(600) // Light on duration
                 _state.update { it.copy(activeLight = null) }
                 delay(200) // Gap
@@ -95,10 +99,12 @@ class SimonGameViewModel(
 
         val expected = s.sequence[s.userStep]
         if (index == expected) {
+            soundManager.playSound(SoundType.CLICK)
             // Correct step
             val nextStep = s.userStep + 1
             if (nextStep >= s.sequence.size) {
                 // Round complete
+                 soundManager.playSound(SoundType.CORRECT)
                  _state.update { it.copy(score = s.score + 1, message = "Good job!") }
                  viewModelScope.launch {
                      delay(500)
@@ -109,11 +115,13 @@ class SimonGameViewModel(
             }
         } else {
             // Wrong
+            soundManager.playSound(SoundType.WRONG)
             endGame()
         }
     }
-
+    
     private fun endGame() {
+        soundManager.playSound(SoundType.GAME_OVER)
         viewModelScope.launch {
             repository.saveGameSession(
                 GameSession(

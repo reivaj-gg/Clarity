@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Info
@@ -24,11 +25,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.Image
 import com.reivaj.clarity.domain.model.AnalyticsSummary
 import com.reivaj.clarity.domain.model.ReportPeriod
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
+import clarity.composeapp.generated.resources.Res
+import clarity.composeapp.generated.resources.logoClarity
+import org.jetbrains.compose.resources.painterResource
+
 
 @Composable
 fun ProfileScreen(
@@ -55,16 +61,66 @@ fun ProfileScreen(
         onDismiss = { viewModel.onImagePickerDismissed() },
     )
 
+    val userName by viewModel.userName.collectAsState()
+    var showEditNameDialog by remember { mutableStateOf(false) }
+
+    // Edit Name Dialog
+    if (showEditNameDialog) {
+        var tempName by remember { mutableStateOf(userName ?: "") }
+        AlertDialog(
+            onDismissRequest = { showEditNameDialog = false },
+            title = { Text("Edit Name") },
+            text = {
+                OutlinedTextField(
+                    value = tempName,
+                    onValueChange = { tempName = it },
+                    label = { Text("Your Name") },
+                    singleLine = true
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.updateUserName(tempName)
+                    showEditNameDialog = false
+                }) {
+                   Text("Save")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditNameDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
     ) {
-        Text(
-            "Profile",
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-        )
+        // Header with Logo
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                "Profile",
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+            )
+            
+            // Logo
+            Image(
+                painter = painterResource(Res.drawable.logoClarity),
+                contentDescription = "Clarity Logo",
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+            )
+        }
         
         Spacer(Modifier.height(24.dp))
 
@@ -102,15 +158,28 @@ fun ProfileScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        // User Info
+        // User Info with Edit Icon
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                "Guest User",
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    userName ?: "Guest User",
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                )
+                IconButton(onClick = { showEditNameDialog = true }) {
+                    Icon(
+                        androidx.compose.material.icons.Icons.Default.Edit,
+                        contentDescription = "Edit Name",
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
             Text(
                 "Version 1.0.0 (Contest Build)",
                 style = MaterialTheme.typography.bodyMedium,
@@ -190,7 +259,7 @@ fun ProfileScreen(
             ) {
                 Column(Modifier.padding(16.dp)) {
                     Text(
-                        "Performance (Last 7 Days)",
+                        "Cognitive Performance (Avg Score)",
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     )
                     Spacer(Modifier.height(8.dp))
@@ -408,6 +477,21 @@ fun ProfileScreen(
                             Text("Inject Demo Data")
                         }
                     }
+                    
+                    Spacer(Modifier.height(8.dp))
+                    
+                    OutlinedButton(
+                        onClick = viewModel::resetApp,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text("Reset / Clear All Data")
+                    }
+                    Text(
+                        "Use this to clear 'Check-in completed' status and start fresh for video recording.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         }

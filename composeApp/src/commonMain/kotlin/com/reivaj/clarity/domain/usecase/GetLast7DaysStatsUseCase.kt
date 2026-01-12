@@ -33,15 +33,22 @@ class GetLast7DaysStatsUseCase(
             it.timestamp.toLocalDateTime(timeZone).date
         }
         
-        // Create chart data
+        // Create chart data: Average Score per day
         return days.map { date ->
             val dayLabel = when {
                 date == today -> "Today"
                 date == today.minus(1, DateTimeUnit.DAY) -> "Yest"
                 else -> date.dayOfWeek.name.take(3)
             }
-            val count = sessionsByDate[date]?.size ?: 0
-            dayLabel to count
+            
+            val dailySessions = sessionsByDate[date] ?: emptyList()
+            val avgScore = if (dailySessions.isNotEmpty()) {
+                dailySessions.map { it.score }.average().toInt()
+            } else {
+                0
+            }
+            
+            dayLabel to avgScore
         }
     }
 }

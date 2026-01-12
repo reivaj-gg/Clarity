@@ -96,4 +96,23 @@ class RoomClarityRepository(
     override suspend fun saveProfilePictureUri(uri: String) {
         preferenceDao.setValue(com.reivaj.clarity.data.local.entity.PreferenceEntity("profile_picture_uri", uri))
     }
+
+    override fun getUserName(): Flow<String?> {
+        return preferenceDao.getValue("user_name")
+            .map { it ?: "Guest User" } // Default if null
+    }
+
+    override suspend fun saveUserName(name: String) {
+        preferenceDao.setValue(com.reivaj.clarity.data.local.entity.PreferenceEntity("user_name", name))
+    }
+
+    override suspend fun clearAllData() {
+        emaDao.deleteAll()
+        gameSessionDao.deleteAll()
+        chatDao.clearHistory()
+        // We keep preferences (userName, pfp) intentionally, or we could clear them.
+        // For standard "Reset" to record video, clearing data (EMA/Games) is usually what is wanted.
+        // If we want FULL reset:
+        // preferenceDao.deleteAll() 
+    }
 }

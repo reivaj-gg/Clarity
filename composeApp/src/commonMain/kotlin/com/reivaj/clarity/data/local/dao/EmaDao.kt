@@ -23,4 +23,7 @@ interface EmaDao {
 
     @Query("SELECT * FROM ema_table ORDER BY timestamp DESC")
     fun getAllEmas(): Flow<List<EmaEntity>>
+
+    @Query("DELETE FROM ema_table")
+    suspend fun deleteAll()
 }
