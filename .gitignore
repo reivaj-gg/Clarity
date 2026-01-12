@@ -17,6 +17,7 @@ Pods/
 *.iws
 *.ipr
 *.kt.bak
+.kotlin/
 
 # Gradle
 .gradle/
@@ -34,3 +35,8 @@ Thumbs.db
 
 # Secrets
 **/GeminiConfig.kt
+
+# User ignored
+PayFlo_Reference/
+how --name-only*
+q
